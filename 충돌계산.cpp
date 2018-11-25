@@ -41,8 +41,8 @@ void collide(stone col_stone1[], stone col_stone2[])
 	float n_angle = asin(col_stone1->sin);
 	col_stone2->sin = sin((PI / 2) - (n_angle + (2 * col_stone2->angle)));
 	col_stone2->cos = cos((PI / 2) - (n_angle + (2 * col_stone2->angle)));
-	col_stone1->force = pre_force * cos(n_angle);
-	col_stone2->force = pre_force * sin(n_angle);
+	col_stone1->force = pre_force * cos((PI / 2) - (n_angle + col_stone2->angle));
+	col_stone2->force = pre_force * sin((PI / 2) - (n_angle + col_stone2->angle));
 	shot(col_stone1);
 	shot(col_stone2);
 };
