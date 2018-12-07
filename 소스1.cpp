@@ -28,6 +28,7 @@ void collide(stone col_stone1, stone col_stone2);				//충돌시 돌 변화
 
 struct stone stones[10] = { {1,  -60, 60,  -90, NULL, NULL, 0 },{ 1, 0, 60, -90, NULL, NULL, 0 },{1, 60, 60, -90, NULL, NULL ,0 },{ 1, -30, 30, -90, NULL, NULL, 0 },{1,  30, 30, -90, NULL, NULL, 0 },
 {2,  -60, -60,  90, NULL, NULL, 0 },{2,  0, -60, 90, NULL, NULL, 0 },{ 2, 60, -60, 90, NULL, NULL ,0 },{2,  -30, -30, 90, NULL, NULL, 0 },{2,  30, -30, 90, NULL, NULL, 0 } };
+struct stone sel_stone = { 0, 0, 0, 0, NULL, NULL, 0 };
 //돌 기본설정
 
 
@@ -38,6 +39,9 @@ int n = 999; //뭐였드라
 
 void Load(struct stone sel_stone)
 {
+	printf("%d번째 돌 장전\n", n);
+	printf("%d번째 돌 힘 : %d\n", n, stones[n].force);
+	printf("%d번째 돌 각도 : %d\n", n, stones[n].angle);
 	sel_stone.sin = sin(sel_stone.angle * (PI / 180));
 	printf("각도 설정됨 : sin %f\n", sel_stone.sin);
 	sel_stone.cos = cos(sel_stone.angle * (PI / 180));
@@ -52,9 +56,9 @@ void shot(struct stone move_stone)
 	while (move_stone.force > 0)
 	{
 		move_stone.x = move_stone.x + ((((move_stone.force) / 10))*move_stone.cos);
-		printf("x좌표 이동 : %f", move_stone.x);
+		printf("x좌표 이동 : %f\n", move_stone.x);
 		move_stone.y = move_stone.y + ((((move_stone.force) / 10))*move_stone.sin);
-		printf("y좌표 이동 : %f", move_stone.y);
+		printf("y좌표 이동 : %f\n", move_stone.y);
 		for (int i = 0; i < 10; ++i)
 		{
 			if ((move_stone.x == stones[i].x) && (move_stone.y == stones[i].y))
@@ -185,7 +189,6 @@ GLvoid Reshape(int w, int h)
 
 void Keyboard(unsigned char key, int x, int y)
 {
-	struct stone sel_stone = { 0, 0, 0, NULL, NULL, 0 };
 
 	switch (key)
 	{
