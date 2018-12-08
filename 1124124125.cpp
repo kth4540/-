@@ -323,7 +323,18 @@ void Timer(int value)
 			white_ball[i].x -= white_ball[i].force * white_ball[i].sin;
 			white_ball[i].y -= white_ball[i].force * white_ball[i].cos;
 			white_ball[i].force -= 0.01*FRICTION;
-			if (white_ball[i].force <= 0)
+			if ((white_ball[i].x > 100) || (white_ball[i].x < -100) || (white_ball[i].y > 100) || (white_ball[i].y < -100))
+			{
+				falling = 1;
+				white_ball[i].z -= pow(grv, 2.0);
+				grv += 0.07f;
+				if (white_ball[i].z < -500)
+				{
+					++Wcount;
+					falling = 0;
+				}
+			}
+			if ((white_ball[i].force <= 0) && (falling == 0))
 			{
 				white_shot_check[i] = false;
 				turn = 1;
@@ -334,7 +345,18 @@ void Timer(int value)
 			blue_ball[i].x += blue_ball[i].force * blue_ball[i].sin;
 			blue_ball[i].y += blue_ball[i].force * blue_ball[i].cos;
 			blue_ball[i].force -= 0.01*FRICTION;
-			if (blue_ball[i].force <= 0)
+			if((blue_ball[i].x > 100) || (blue_ball[i].x < -100) || (blue_ball[i].y > 100) || (blue_ball[i].y < -100))
+			{
+				falling = 1;
+				blue_ball[i].z -= pow(grv, 2.0);
+				grv += 0.07f;
+				if (blue_ball[i].z < -500)
+				{
+					++Wcount;
+					falling = 0;
+				}
+			}
+			if ((blue_ball[i].force <= 0) && (falling == 0))
 			{
 				blue_shot_check[i] = false;
 				turn = 0;
@@ -347,8 +369,9 @@ void Timer(int value)
 			{
 				if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
 				{
+					pre_force = white_ball[i].force;
 					t_angle = asin(-((white_ball[i].y - blue_ball[j].y) / 10));
-					blue_ball[j].force = white_ball[i].force;
+					blue_ball[j].force = pre_force * cos(PI - (t_angle + white_ball[i].angle));
 					blue_ball[j].cos = -((white_ball[i].y - blue_ball[j].y) / 10);
 					blue_ball[j].sin = -((white_ball[i].x - blue_ball[j].x) / 10);
 					blue_shot_check[j] = true;
@@ -356,12 +379,13 @@ void Timer(int value)
 				}
 				if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
 				{
-					white_ball[j].force = blue_ball[j].force;
-					white_ball[j].cos = -sin(PI - (t_angle + (2 * white_ball[j].angle)));
+					white_ball[j].force = pre_force * sin(PI - (t_angle + white_ball[i].angle));
+					white_ball[j].cos = sin(PI - (t_angle + (2 * white_ball[j].angle)));
 					white_ball[j].sin = cos(PI- (t_angle + (2 * white_ball[j].angle)));
 					white_shot_check[j] = true;
 				}
 			}
+			pre_force = 0;
 		}
 		else if (turn == 1)
 		{
