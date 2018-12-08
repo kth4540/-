@@ -260,6 +260,16 @@ void White_Shot(int n)
 			white_shot_check[n] = false;
 			turn = true;
 		}
+		for (int i = 0; i < 5; ++i)
+		{
+			if (pow(white_ball[n].x - blue_ball[i].x, 2) + pow(white_ball[n].y - blue_ball[i].y, 2) < 100)
+			{
+				blue_ball[i].force = white_ball[n].force / 2;
+				blue_ball[i].sin = -1 * white_ball[n].sin;
+				blue_ball[i].cos = -1 * white_ball[n].cos;
+				Blue_Shot(i);
+			}
+		}
 	}
 }
 
@@ -274,6 +284,16 @@ void Blue_Shot(int n)
 		{
 			blue_shot_check[n] = false;
 			turn = false;
+		}
+		for (int i = 0; i < 5; ++i)
+		{
+			if (pow(blue_ball[n].x - white_ball[i].x, 2) + pow(blue_ball[n].y - white_ball[i].y, 2) < 100)
+			{
+				white_ball[i].force = blue_ball[n].force / 2;
+				white_ball[i].sin = -1 * blue_ball[n].sin;
+				white_ball[i].cos = -1 * blue_ball[n].cos;
+				White_Shot(i);
+			}
 		}
 	}
 }
