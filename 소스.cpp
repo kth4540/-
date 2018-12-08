@@ -16,18 +16,23 @@ struct BALL
 	float force;
 };
 
-float camx = 0;
-float camy = 100;
-float camz = 100;
+float yangle = 135;
+float camangle = 270;
 
 int choose = 0;
 
 BALL blue_ball[5] = { { -60,-60 },{ 0,-60 },{ 60,-60 },{ -30,-30 },{ 30,-30 } };
 BALL white_ball[5] = { { -60,60 },{ 0,60 },{ 60,60 },{ -30,30 },{ 30,30 } };
 
+bool white_shot_check[5];
+bool blue_shot_check[5];
+
+bool turn = false;
+
 void Keyboard(unsigned char key, int x, int y);
 void Timer(int value);
-void Shot();
+void White_Shot(int n);
+void Blue_Shot(int n);
 
 
 void main(int argc, char *argv[])
@@ -51,7 +56,7 @@ GLvoid drawScene(GLvoid)
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(camx, camy, camz, 0, 0, -300, 0, 1, 0);
+	gluLookAt((100 * sin(PI / 180 * camangle)), (100 * sin(PI / 180 * yangle)), (100 * cos(PI / 180 * camangle)), 0, 0, 0, 0, 1, 0);
 
 	glPushMatrix();
 	{
@@ -111,10 +116,21 @@ GLvoid drawScene(GLvoid)
 	glPushMatrix();
 	{
 		glColor3f(0, 1, 0);
-		glTranslatef(white_ball[choose].x, 20, white_ball[choose].y);
-		glRotatef(180, 1, 0, 0);
-		glRotatef(-1*white_ball[choose].angle, 0, 1, 0);
-		glScalef(1 + white_ball[choose].force, 1 + white_ball[choose].force, 1 + white_ball[choose].force);
+		if(turn==false)
+			glTranslatef(white_ball[choose].x, 20, white_ball[choose].y);
+		else
+			glTranslatef(blue_ball[choose].x, 20, blue_ball[choose].y);
+		if(turn==false)
+			glRotatef(180, 1, 0, 0);
+
+		if(turn==false)
+			glRotatef(-1*white_ball[choose].angle, 0, 1, 0);
+		else
+			glRotatef(blue_ball[choose].angle, 0, 1, 0);
+		if(turn==false)
+			glScalef(1 + white_ball[choose].force, 1 + white_ball[choose].force, 1 + white_ball[choose].force);
+		else
+			glScalef(1 + blue_ball[choose].force, 1 + blue_ball[choose].force, 1 + blue_ball[choose].force);
 		glutSolidCone(5, 10, 10, 10);
 	}
 	glPopMatrix();
@@ -131,6 +147,12 @@ GLvoid Reshape(int w, int h)
 	glTranslatef(0.0, 0.0, -300.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	for (int i = 0; i < 5; ++i)
+	{
+		blue_shot_check[i] = false;
+		white_shot_check[i] = false;
+	}
 }
 
 void Keyboard(unsigned char key, int x, int y)
@@ -138,16 +160,16 @@ void Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		camy += 3;
+		yangle += 3;
 		break;
 	case 's':
-		camy -= 3;
+		yangle -= 3;
 		break;
 	case 'a':
-		camx -= 3;
+		camangle -= 3;
 		break;
 	case 'd':
-		camx += 3;
+		camangle += 3;
 		break;
 
 	case '1':
@@ -167,21 +189,45 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 'q':
-		white_ball[choose].angle += 1;
-		white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
-		white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
+		if (turn == false)
+		{
+			white_ball[choose].angle += 1;
+			white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
+			white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
+		}
+		else
+		{
+			blue_ball[choose].angle += 1;
+			blue_ball[choose].sin = sin(PI / 180 * blue_ball[choose].angle);
+			blue_ball[choose].cos = cos(PI / 180 * blue_ball[choose].angle);
+		}
 		break;
 	case 'e':
-		white_ball[choose].angle -= 1;
-		white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
-		white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
+		if (turn == false)
+		{
+			white_ball[choose].angle -= 1;
+			white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
+			white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
+		}
+		else
+		{
+			blue_ball[choose].angle -= 1;
+			blue_ball[choose].sin = sin(PI / 180 * blue_ball[choose].angle);
+			blue_ball[choose].cos = cos(PI / 180 * blue_ball[choose].angle);
+		}
 		break;
 	case ' ':
-		white_ball[choose].force += 0.01;
+		if(turn==false)
+			white_ball[choose].force += 0.02;
+		else
+			blue_ball[choose].force += 0.02;
 		break;
 
 	case 'f':
-		Shot();
+		if (turn == false)
+			white_shot_check[choose] = true;
+		else
+			blue_shot_check[choose] = true;
 		break;
 	}
 	glutPostRedisplay();
@@ -189,17 +235,45 @@ void Keyboard(unsigned char key, int x, int y)
 
 void Timer(int value)
 {
-	glutPostRedisplay();
+	for (int i = 0; i < 5; ++i)
+	{
+		if (white_shot_check[i] == true)
+		{
+			White_Shot(i);
+		}
+		else if (blue_shot_check[i] == true)
+		{
+			Blue_Shot(i);
+		}
+	}glutPostRedisplay();
 	glutTimerFunc(10, Timer, 1);
 }
-void Shot()
+void White_Shot(int n)
 {
-	while (white_ball[choose].force > 0)
+	if (white_ball[n].force > 0)
 	{
-		white_ball[choose].x -= white_ball[choose].force * white_ball[choose].sin;
-		white_ball[choose].y -= white_ball[choose].force * white_ball[choose].cos;
-		white_ball[choose].force -= 0.01*FRICTION;
-		printf("%f %f\n", white_ball[choose].x, white_ball[choose].y);
-		glutPostRedisplay();
+		white_ball[n].x -= white_ball[n].force * white_ball[n].sin;
+		white_ball[n].y -= white_ball[n].force * white_ball[n].cos;
+		white_ball[n].force -= 0.02*FRICTION;
+		if (white_ball[n].force <= 0)
+		{
+			white_shot_check[n] = false;
+			turn = true;
+		}
+	}
+}
+
+void Blue_Shot(int n)
+{
+	if (blue_ball[n].force > 0)
+	{
+		blue_ball[n].x += blue_ball[n].force * blue_ball[n].sin;
+		blue_ball[n].y += blue_ball[n].force * blue_ball[n].cos;
+		blue_ball[n].force -= 0.02*FRICTION;
+		if (blue_ball[n].force <= 0)
+		{
+			blue_shot_check[n] = false;
+			turn = false;
+		}
 	}
 }
