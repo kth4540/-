@@ -10,26 +10,33 @@ struct BALL
 {
 	float x;
 	float y;
+	float z;
 	float angle;
 	float sin;
 	float cos;
 	float force;
 };
 
-float zoom = 100;
-float yangle = 135;
-float camangle = 0;
-float camx = 0;
-float camy = 100;
-float camz = 100;
+float Wzoom = 100;
+float Wyangle = 135;
+float Wcamangle = 0;
+float Bzoom = 100;
+float Byangle = 135;
+float Bcamangle = 180;
+
+float grv = 1;
 
 int choose = 0;
 bool shot_check = 0;
+bool falling = 0;
 
 int turn = 0;	// 0 = Èòµ¹ 1 = ÆÄ¶ûµ¹
 
-BALL blue_ball[5] = { { -60,-60 },{ 0,-60 },{ 60,-60 },{ -30,-30 },{ 30,-30 } };
-BALL white_ball[5] = { { -60,60 },{ 0,60 },{ 60,60 },{ -30,30 },{ 30,30 } };
+int Wcount = 0;
+int Bcount = 0;
+
+BALL blue_ball[5] = { { -60,-60, -7.5 },{ 0,-60, -7.5 },{ 60,-60, -7.5 },{ -30,-30, -7.5 },{ 30,-30, -7.5 } };
+BALL white_ball[5] = { { -60,60, -7.5 },{ 0,60, -7.5 },{ 60,60, -7.5 },{ -30,30, -7.5 },{ 30,30, -7.5 } };
 
 void Keyboard(unsigned char key, int x, int y);
 void Timer(int value);
@@ -57,7 +64,14 @@ GLvoid drawScene(GLvoid)
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt((zoom*sin(PI/180*camangle)), (zoom * sin(PI / 180 * yangle)), (zoom* cos(PI / 180 * camangle)), 0, 0, 0, 0, 1, 0);
+	if (turn == 0)
+	{
+		gluLookAt((Wzoom*sin(PI / 180 * Wcamangle)), (Wzoom * sin(PI / 180 * Wyangle)), (Wzoom* cos(PI / 180 * Wcamangle)), 0, 0, 0, 0, 1, 0);
+	}
+	else if (turn == 1)
+	{
+		gluLookAt((Bzoom*sin(PI / 180 * Bcamangle)), (Bzoom * sin(PI / 180 * Byangle)), (Bzoom* cos(PI / 180 * Bcamangle)), 0, 0, 0, 0, 1, 0);
+	}
 
 	glPushMatrix();
 	{
@@ -98,7 +112,7 @@ GLvoid drawScene(GLvoid)
 		glColor3f(1, 1, 1);
 		glPushMatrix();
 		{
-			glTranslatef(white_ball[i].x, 0, white_ball[i].y);
+			glTranslatef(white_ball[i].x, white_ball[i].z, white_ball[i].y);
 			glScalef(1, 0.5, 1);
 			glutSolidSphere(5, 20, 20);
 		}
@@ -107,7 +121,7 @@ GLvoid drawScene(GLvoid)
 		glColor3f(0, 0, 1);
 		glPushMatrix();
 		{
-			glTranslatef(blue_ball[i].x, 0, blue_ball[i].y);
+			glTranslatef(blue_ball[i].x, blue_ball[i].z, blue_ball[i].y);
 			glScalef(1, 0.5, 1);
 			glutSolidSphere(5, 20, 20);
 		}
@@ -156,22 +170,64 @@ void Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case '+':
-		zoom -= 2;
+		if (turn == 0)
+		{
+			Wzoom -= 5;
+		}
+		else if (turn == 1)
+		{
+			Bzoom -= 5;
+		}
 		break;
 	case '-':
-		zoom += 2;
+		if (turn == 0)
+		{
+			Wzoom += 5;
+		}
+		else if (turn == 1)
+		{
+			Bzoom += 5;
+		}
 		break;
 	case 'w':
-		yangle += 3;
+		if (turn == 0)
+		{
+			Wyangle += 3;
+		}
+		else if (turn == 1)
+		{
+			Byangle += 3;
+		}
 		break;
 	case 's':
-		yangle -= 3;
+		if (turn == 0)
+		{
+			Wyangle -= 3;
+		}
+		else if (turn == 1)
+		{
+			Byangle -= 3;
+		}
 		break;
 	case 'a':
-		camangle -= 3;
+		if (turn == 0)
+		{
+			Wcamangle -= 3;
+		}
+		else if (turn == 1)
+		{
+			Bcamangle -= 3;
+		}
 		break;
 	case 'd':
-		camangle += 3;
+		if (turn == 0)
+		{
+			Wcamangle += 3;
+		}
+		else if (turn == 1)
+		{
+			Bcamangle += 3;
+		}
 		break;
 	case '1':
 		choose = 0;
@@ -241,19 +297,21 @@ void Timer(int value)
 		if (turn == 0)
 		{
 			Shot();
-			if (white_ball[choose].force <= 0)
+			if ((white_ball[choose].force <= 0) && (falling == 0))
 			{
 				shot_check = 0;
 				turn = 1;
+				grv = 1.0f;
 			}
 		}
 		else if (turn == 1)
 		{
 			Shot();
-			if (blue_ball[choose].force <= 0)
+			if ((blue_ball[choose].force <= 0) && (falling == 0))
 			{
 				shot_check = 0;
 				turn = 0;
+				grv = 1.0f;
 			}
 		}
 	}
@@ -270,6 +328,17 @@ void Shot()
 			white_ball[choose].y -= white_ball[choose].force * white_ball[choose].cos;
 			white_ball[choose].force -= 0.01*FRICTION;
 			printf("%f %f\n", white_ball[choose].x, white_ball[choose].y);
+			if ((white_ball[choose].x > 100) || (white_ball[choose].x < -100) || (white_ball[choose].y > 100) || (white_ball[choose].y < -100))
+			{
+				falling = 1;
+				white_ball[choose].z -= pow(grv, 2.0);
+				grv += 0.07f;
+				if (white_ball[choose].z < -500)
+				{
+					++Wcount;
+					falling = 0;
+				}
+			}
 		}
 	}
 	else if (turn == 1)
@@ -280,6 +349,17 @@ void Shot()
 			blue_ball[choose].y -= blue_ball[choose].force * blue_ball[choose].cos;
 			blue_ball[choose].force -= 0.01*FRICTION;
 			printf("%f %f\n", blue_ball[choose].x, blue_ball[choose].y);
+			if ((blue_ball[choose].x > 100) || (blue_ball[choose].x < -100) || (blue_ball[choose].y > 100) || (blue_ball[choose].y < -100))
+			{
+				falling = 1;
+				blue_ball[choose].z -= pow(grv, 2.0);
+				grv += 0.07f;
+				if (blue_ball[choose].z < -500)
+				{
+					falling = 0;
+					++Bcount;
+				}
+			}
 		}
 	}
 }
