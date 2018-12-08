@@ -152,6 +152,16 @@ GLvoid Reshape(int w, int h)
 	{
 		blue_shot_check[i] = false;
 		white_shot_check[i] = false;
+
+		white_ball[i].angle = 0;
+		white_ball[i].cos = 1;
+		white_ball[i].sin = 0;
+		white_ball[i].force = 0;
+
+		blue_ball[i].angle = 0;
+		blue_ball[i].cos = 1;
+		blue_ball[i].sin = 0;
+		blue_ball[i].force = 0;
 	}
 }
 
@@ -239,16 +249,51 @@ void Timer(int value)
 	{
 		if (white_shot_check[i] == true)
 		{
-			White_Shot(i);
+			white_ball[i].x -= white_ball[i].force * white_ball[i].sin;
+			white_ball[i].y -= white_ball[i].force * white_ball[i].cos;
+			white_ball[i].force -= 0.02*FRICTION;
+			if (white_ball[i].force <= 0)
+			{
+				white_shot_check[i] = false;
+				
+			}
 		}
-		else if (blue_shot_check[i] == true)
+		if (blue_shot_check[i] == true)
 		{
-			Blue_Shot(i);
+			blue_ball[i].x += blue_ball[i].force * blue_ball[i].sin;
+			blue_ball[i].y += blue_ball[i].force * blue_ball[i].cos;
+			blue_ball[i].force -= 0.02*FRICTION;
+			if (blue_ball[i].force <= 0)
+			{
+				blue_shot_check[i] = false;
+
+			}
 		}
-	}glutPostRedisplay();
+
+		for (int j = 0; j < 5; ++j)
+		{
+			if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
+			{
+				blue_ball[j].force = white_ball[i].force;
+				blue_ball[j].cos = white_ball[i].cos;
+				blue_ball[j].sin = white_ball[i].sin;
+				blue_shot_check[j] = true;
+			}
+
+			if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
+			{
+				white_ball[j].force = blue_ball[i].force;
+				white_ball[j].cos = blue_ball[i].cos;
+				white_ball[j].sin = blue_ball[i].sin;
+				white_shot_check[j] = true;
+			}
+		}
+	}
+	
+	glutPostRedisplay();
 	glutTimerFunc(10, Timer, 1);
 }
-void White_Shot(int n)
+/*void White_Shot(int n)
 {
 	if (white_ball[n].force > 0)
 	{
@@ -265,9 +310,13 @@ void White_Shot(int n)
 			if (pow(white_ball[n].x - blue_ball[i].x, 2) + pow(white_ball[n].y - blue_ball[i].y, 2) < 100)
 			{
 				blue_ball[i].force = white_ball[n].force / 2;
-				blue_ball[i].sin = -1 * white_ball[n].sin;
-				blue_ball[i].cos = -1 * white_ball[n].cos;
-				Blue_Shot(i);
+				blue_ball[i].sin = white_ball[n].sin;
+				blue_ball[i].cos = white_ball[n].cos;
+				if (blue_shot_check[i] == false)
+				{
+					blue_shot_check[i] = true;
+					Blue_Shot(i);
+				}
 			}
 		}
 	}
@@ -290,10 +339,14 @@ void Blue_Shot(int n)
 			if (pow(blue_ball[n].x - white_ball[i].x, 2) + pow(blue_ball[n].y - white_ball[i].y, 2) < 100)
 			{
 				white_ball[i].force = blue_ball[n].force / 2;
-				white_ball[i].sin = -1 * blue_ball[n].sin;
-				white_ball[i].cos = -1 * blue_ball[n].cos;
-				White_Shot(i);
+				white_ball[i].sin =  blue_ball[n].sin;
+				white_ball[i].cos =  blue_ball[n].cos;
+				if (white_shot_check == false)
+				{
+					white_shot_check[i] = true;
+					White_Shot(i);
+				}
 			}
 		}
 	}
-}
+}*/
