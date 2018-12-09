@@ -34,6 +34,7 @@ void Timer(int value);
 
 
 float GetAngle(int ball1, int ball2);
+float Same_GetAngle(int ball1, int ball2);
 
 void main(int argc, char *argv[])
 {
@@ -247,7 +248,7 @@ void Timer(int value)
 {
 	for (int i = 0; i < 5; ++i)
 	{
-		
+
 		if (white_shot_check[i] == true)
 		{
 			white_ball[i].x -= white_ball[i].force * white_ball[i].sin;
@@ -319,17 +320,14 @@ void Timer(int value)
 					blue_shot_check[j] = true;
 					printf("%f %f\n", white_ball[i].x, white_ball[i].y);
 				}
-			}
-/*			for (int j = 0; j < 5; ++j)
-			{
-				if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
+
+				if (i != j && pow(white_ball[i].x - white_ball[j].x, 2) + pow(white_ball[i].y - white_ball[j].y, 2) < 100)
 				{
-					white_ball[j].force = blue_ball[i].force;
-					white_ball[j].cos = sin(GetAngle(j, i));
-					white_ball[j].sin = cos(GetAngle(j, i));
-					white_shot_check[j] = true;
+					white_ball[i].cos = sin(Same_GetAngle(i, j));
+					white_ball[i].sin = cos(Same_GetAngle(i, j));
 				}
-			}*/
+			}
+
 		}
 		else if (turn == true)
 		{
@@ -342,7 +340,13 @@ void Timer(int value)
 					white_ball[j].sin = cos(GetAngle(j, i));
 					white_shot_check[j] = true;
 				}
+				if (i != j && pow(blue_ball[i].x - blue_ball[j].x, 2) + pow(blue_ball[i].y - blue_ball[j].y, 2) < 100)
+				{
+					blue_ball[i].cos = sin(Same_GetAngle(j, i));
+					blue_ball[i].sin = cos(Same_GetAngle(j, i));
+				}
 			}
+
 		}
 	}
 
@@ -355,6 +359,29 @@ float GetAngle(int ball1, int ball2)
 	float angle;
 	float deltaX = blue_ball[ball2].x - white_ball[ball1].x;
 	float deltaY = blue_ball[ball2].y - white_ball[ball1].y;
+	angle = acosf(deltaX / 10);
+
+	if (deltaY < 0)
+		angle = 3.14 + (3.14 - angle);
+
+	return angle;
+}
+
+float Same_GetAngle(int ball1, int ball2)
+{
+	float angle;
+	float deltaX;
+	float deltaY;
+	if (turn == false)
+	{
+		deltaX = white_ball[ball2].x - white_ball[ball1].x;
+		deltaY = white_ball[ball2].y - white_ball[ball1].y;
+	}
+	else if (turn == true)
+	{
+		deltaX = blue_ball[ball2].x - blue_ball[ball1].x;
+		deltaY = blue_ball[ball2].y - blue_ball[ball1].y;
+	}
 	angle = acosf(deltaX / 10);
 
 	if (deltaY < 0)
