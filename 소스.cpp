@@ -34,6 +34,7 @@ void Timer(int value);
 void White_Shot(int n);
 void Blue_Shot(int n);
 
+float GetAngle(int ball1, int ball2);
 
 void main(int argc, char *argv[])
 {
@@ -201,13 +202,13 @@ void Keyboard(unsigned char key, int x, int y)
 	case 'q':
 		if (turn == false)
 		{
-			white_ball[choose].angle += 1;
+			white_ball[choose].angle += 3;
 			white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
 			white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
 		}
 		else
 		{
-			blue_ball[choose].angle += 1;
+			blue_ball[choose].angle += 3;
 			blue_ball[choose].sin = sin(PI / 180 * blue_ball[choose].angle);
 			blue_ball[choose].cos = cos(PI / 180 * blue_ball[choose].angle);
 		}
@@ -215,13 +216,13 @@ void Keyboard(unsigned char key, int x, int y)
 	case 'e':
 		if (turn == false)
 		{
-			white_ball[choose].angle -= 1;
+			white_ball[choose].angle -= 3;
 			white_ball[choose].sin = sin(PI / 180 * white_ball[choose].angle);
 			white_ball[choose].cos = cos(PI / 180 * white_ball[choose].angle);
 		}
 		else
 		{
-			blue_ball[choose].angle -= 1;
+			blue_ball[choose].angle -= 3;
 			blue_ball[choose].sin = sin(PI / 180 * blue_ball[choose].angle);
 			blue_ball[choose].cos = cos(PI / 180 * blue_ball[choose].angle);
 		}
@@ -275,16 +276,18 @@ void Timer(int value)
 			if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
 			{
 				blue_ball[j].force = white_ball[i].force;
-				blue_ball[j].cos = white_ball[i].cos;
-				blue_ball[j].sin = white_ball[i].sin;
+				blue_ball[j].cos = sin(GetAngle(i, j));
+				blue_ball[j].sin = cos(GetAngle(i, j));
 				blue_shot_check[j] = true;
 			}
-
+		}
+		for (int j = 0; j < 5; ++j)
+		{
 			if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
 			{
 				white_ball[j].force = blue_ball[i].force;
-				white_ball[j].cos = blue_ball[i].cos;
-				white_ball[j].sin = blue_ball[i].sin;
+				white_ball[j].cos = cos(30);
+				white_ball[j].sin = cos(30);
 				white_shot_check[j] = true;
 			}
 		}
@@ -292,6 +295,19 @@ void Timer(int value)
 	
 	glutPostRedisplay();
 	glutTimerFunc(10, Timer, 1);
+}
+
+float GetAngle(int ball1, int ball2)
+{
+	float angle;
+	float deltaX = blue_ball[ball2].x - white_ball[ball1].x;
+	float deltaY = blue_ball[ball2].y - white_ball[ball1].y;
+	angle = acosf(deltaX / 10);
+
+	if (deltaY < 0)
+		angle = 3.14 + (3.14 - angle);
+
+	return angle;
 }
 /*void White_Shot(int n)
 {
