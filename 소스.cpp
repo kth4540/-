@@ -48,6 +48,10 @@ bool mode = false;
 void Keyboard(unsigned char key, int x, int y);
 void Timer(int value);
 
+float arm_round = 0;
+int motion_check = 0;
+float motion = 1.0;
+
 
 float GetAngle(int ball1, int ball2);
 float Same_GetAngle(int ball1, int ball2);
@@ -69,7 +73,7 @@ void main(int argc, char *argv[])
 // 윈도우 출력 함수
 GLvoid drawScene(GLvoid)
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // 바탕색을 'blue' 로 지정
+	glClearColor(0.83f, 0.85f, 0.90f, 1.0f); // 바탕색을 'blue' 로 지정
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 설정된 색으로 전체를 칠하기
 	glEnable(GL_DEPTH_TEST);
 
@@ -247,6 +251,279 @@ GLvoid drawScene(GLvoid)
 			glutSolidCylinder(2.5, 30, 15, 15);
 			glPopMatrix();
 		}
+		//////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////
+		glPushMatrix();
+		{
+			glTranslatef(200, 0, 0);
+			glRotatef(-90, 0, 1, 0);
+			glScalef(0.8, 0.8, 0.8);
+			glPushMatrix();
+			{
+				glScalef(0.3f, 1.0f, 0.7f);
+				glColor3f(0.5f, 0.8f, 0.6f);
+				glutSolidCube(30.0);
+			}
+			glPopMatrix(); // 몸통
+
+			glPushMatrix();
+			{
+				glTranslatef(5.0, 5.0, 0.0);
+				glRotatef(90, 0, 1, 0);
+				glColor3f(0.1f, 0.3f, 0.3f);
+				glutSolidCone(2, 5, 10, 10);
+			}
+			glPopMatrix(); // 부리
+
+			glPushMatrix();
+			{
+				glPushMatrix();
+				glTranslatef(0.0, 17.0, 2.0);
+				glRotatef(20, 1, 0, 0);
+				glColor3f(0.3f, 0.6f, 0.5f);
+				glScalef(0.5, 1.0, 0.5);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(0.0, 17.0, -2.0);
+				glRotatef(-20, 1, 0, 0);
+				glColor3f(0.3f, 0.6f, 0.5f);
+				glScalef(0.5, 1.0, 0.5);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+			}
+			glPopMatrix(); // 부리
+
+
+			glPushMatrix();
+			{
+				glTranslatef(6.0, 10.0, -5.0);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(1);
+				glTranslatef(0, 0, 10);
+				glutSolidCube(1);
+			}
+			glPopMatrix(); // 눈 검은자
+
+			glPushMatrix();
+			{
+				glPushMatrix();
+				glTranslatef(5, 10, -5);
+				glScalef(0.01, 1.0, 0.7);
+				glColor3f(1, 1, 1);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(5, 10, 5);
+				glScalef(0.01, 1.0, 0.7);
+				glColor3f(1, 1, 1);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+			}
+			glPopMatrix(); // 눈 흰자
+
+			glPushMatrix();
+			{
+				glTranslatef(0, -2, 0);
+				glScalef(0.5, 0.3, 1.0);
+				glColor3f(0.95, 0.47, 0.5);
+				glutSolidCube(22.0);
+			}
+			glPopMatrix(); // 허리
+
+			glPushMatrix();
+			{
+				glTranslatef(0, -10, 0);
+				glScalef(0.5, 0.4, 1.0);
+				glColor3f(1.0, 1.0, 1.0);
+				glutSolidCube(22.0);
+			}
+			glPopMatrix(); // 배
+
+			glPushMatrix();
+			{
+				glRotatef(-30 + arm_round, 0.0, 0.0, 1.0);
+				glRotatef(-10, 1, 0, 0);
+				glTranslatef(0.0, -7.0, 11.0);
+				glScalef(0.3f, 1.2f, 0.3f);
+				glColor3f(0.95, 0.47, 0.5);
+				glutSolidSphere(5, 10, 10);
+			}
+			glPopMatrix(); //왼쪽 팔
+
+			glPushMatrix();
+			{
+				glRotatef(30 - arm_round, 0.0, 0.0, 1.0);
+				glRotatef(10, 1, 0, 0);
+				glTranslatef(0.0, -7.0, -11.0);
+				glScalef(0.3f, 1.2f, 0.3f);
+				glColor3f(0.95, 0.47, 0.5);
+				glutSolidSphere(5, 10, 10);
+			}
+			glPopMatrix();// 오른쪽 팔
+
+			glTranslatef(0.0, -15.0, 0.0); // 다리 부분으로 이동
+
+			glPushMatrix();
+			{
+				glRotatef(30 - arm_round, 0.0, 0.0, 1.0);
+				glTranslatef(0.0, -3.0, 8.0);
+				glScalef(0.1f, 0.7f, 0.1f);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(10.0);
+			}
+			glPopMatrix(); // 왼쪽 다리
+
+			glPushMatrix();
+			{
+				glRotatef(-30 + arm_round, 0.0, 0.0, 1.0);
+				glTranslatef(0.0, -3.0, -8.0);
+				glScalef(0.1f, 0.7f, 0.1f);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(10.0);
+			}
+			glPopMatrix(); // 오른쪽 다리
+		}
+		glPopMatrix(); // 호무새
+		////////////////////////////////////
+		////////////////////////////////////
+
+		glPushMatrix();
+		{
+			glTranslatef(-200, 0, 0);
+			glRotatef(-90, 0, 1, 0);
+			glScalef(0.8, 0.8, 0.8);
+			glPushMatrix();
+			{
+				glScalef(0.3f, 1.0f, 0.7f);
+				glColor3f(0.5f, 0.8f, 0.6f);
+				glutSolidCube(30.0);
+			}
+			glPopMatrix(); // 몸통
+
+			glPushMatrix();
+			{
+				glTranslatef(5.0, 5.0, 0.0);
+				glRotatef(90, 0, 1, 0);
+				glColor3f(0.1f, 0.3f, 0.3f);
+				glutSolidCone(2, 5, 10, 10);
+			}
+			glPopMatrix(); // 부리
+
+			glPushMatrix();
+			{
+				glPushMatrix();
+				glTranslatef(0.0, 17.0, 2.0);
+				glRotatef(20, 1, 0, 0);
+				glColor3f(0.3f, 0.6f, 0.5f);
+				glScalef(0.5, 1.0, 0.5);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(0.0, 17.0, -2.0);
+				glRotatef(-20, 1, 0, 0);
+				glColor3f(0.3f, 0.6f, 0.5f);
+				glScalef(0.5, 1.0, 0.5);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+			}
+			glPopMatrix(); // 부리
+
+
+			glPushMatrix();
+			{
+				glTranslatef(6.0, 10.0, -5.0);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(1);
+				glTranslatef(0, 0, 10);
+				glutSolidCube(1);
+			}
+			glPopMatrix(); // 눈 검은자
+
+			glPushMatrix();
+			{
+				glPushMatrix();
+				glTranslatef(5, 10, -5);
+				glScalef(0.01, 1.0, 0.7);
+				glColor3f(1, 1, 1);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(5, 10, 5);
+				glScalef(0.01, 1.0, 0.7);
+				glColor3f(1, 1, 1);
+				glutSolidSphere(3, 10, 10);
+				glPopMatrix();
+			}
+			glPopMatrix(); // 눈 흰자
+
+			glPushMatrix();
+			{
+				glTranslatef(0, -2, 0);
+				glScalef(0.5, 0.3, 1.0);
+				glColor3f(0.56, 0.57, 0.95);
+				glutSolidCube(22.0);
+			}
+			glPopMatrix(); // 허리
+
+			glPushMatrix();
+			{
+				glTranslatef(0, -10, 0);
+				glScalef(0.5, 0.4, 1.0);
+				glColor3f(1.0, 1.0, 1.0);
+				glutSolidCube(22.0);
+			}
+			glPopMatrix(); // 배
+
+			glPushMatrix();
+			{
+				glRotatef(-30 + arm_round, 0.0, 0.0, 1.0);
+				glRotatef(-10, 1, 0, 0);
+				glTranslatef(0.0, -7.0, 11.0);
+				glScalef(0.3f, 1.2f, 0.3f);
+				glColor3f(0.56, 0.57, 0.95);
+				glutSolidSphere(5, 10, 10);
+			}
+			glPopMatrix(); //왼쪽 팔
+
+			glPushMatrix();
+			{
+				glRotatef(30 - arm_round, 0.0, 0.0, 1.0);
+				glRotatef(10, 1, 0, 0);
+				glTranslatef(0.0, -7.0, -11.0);
+				glScalef(0.3f, 1.2f, 0.3f);
+				glColor3f(0.56, 0.57, 0.95);
+				glutSolidSphere(5, 10, 10);
+			}
+			glPopMatrix();// 오른쪽 팔
+
+			glTranslatef(0.0, -15.0, 0.0); // 다리 부분으로 이동
+
+			glPushMatrix();
+			{
+				glRotatef(30 - arm_round, 0.0, 0.0, 1.0);
+				glTranslatef(0.0, -3.0, 8.0);
+				glScalef(0.1f, 0.7f, 0.1f);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(10.0);
+			}
+			glPopMatrix(); // 왼쪽 다리
+
+			glPushMatrix();
+			{
+				glRotatef(-30 + arm_round, 0.0, 0.0, 1.0);
+				glTranslatef(0.0, -3.0, -8.0);
+				glScalef(0.1f, 0.7f, 0.1f);
+				glColor3f(0.0f, 0.0f, 0.0f);
+				glutSolidCube(10.0);
+			}
+			glPopMatrix(); // 오른쪽 다리
+		}
+		glPopMatrix(); // 호무새
 	}
 
 
@@ -428,6 +705,21 @@ void Keyboard(unsigned char key, int x, int y)
 
 void Timer(int value)
 {
+	if (motion_check == 0)
+	{
+		motion += 0.01;
+		arm_round += 0.5;
+		if (motion >= 2.0)
+			motion_check = 1;
+	}
+	else if (motion_check == 1)
+	{
+		motion -= 0.01;
+		arm_round -= 0.5;
+
+		if (motion <= 1.0)
+			motion_check = 0;
+	}
 	for (int i = 0; i < 5; ++i)
 	{
 
