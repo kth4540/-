@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #define PI 3.141592
-#define FRICTION 0.2;
+#define FRICTION 2;
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 
@@ -22,17 +22,20 @@ float height;
 
 float grv = 1;
 
-float yangle = 135;
-float camangle = 270;
-
+float Wzoom = 100;
+float Wyangle = 135;
+float Wcamangle = 0;
+float Bzoom = 100;
+float Byangle = 135;
+float Bcamangle = 180;
 int choose = 0;
 
 float block_x[4];
 float block_y[4];
 
 
-BALL blue_ball[5] = { { -60,-60,0 },{ 0,-60,0 },{ 60,-60,0 },{ -30,-60,0 },{ 30,-60,0} };
-BALL white_ball[5] = { { -60,60,0 },{ 0,60,0 },{ 60,60,0 },{ -30,60,0 },{ 30,60,0 } };
+BALL blue_ball[5] = { { -60,-60,-7.5 },{ 0,-60,-7.5 },{ 60,-60,-7.5 },{ -30,-60,-7.5 },{ 30,-60,-7.5 } };
+BALL white_ball[5] = { { -60,60,-7.5 },{ 0,60,-7.5 },{ 60,60,-7.5 },{ -30,60,-7.5 },{ 30,60,-7.5 } };
 
 bool white_death[5];
 bool blue_death[5];
@@ -114,14 +117,14 @@ GLvoid drawScene(GLvoid)
 		}
 		glEnd();
 		glColor3f(1, 1, 0);
-		for (int i = 0; i < 4;++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			glPushMatrix();
 			glTranslatef(block_x[i], block_y[i], 30);
-			glutSolidSphere(6,6,6);
+			glutSolidSphere(6, 6, 6);
 			glPopMatrix();
 		}
-		
+
 	}
 	else if (mode == true)
 	{
@@ -132,7 +135,28 @@ GLvoid drawScene(GLvoid)
 		glTranslatef(0.0, 0.0, -300.0);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt((100 * sin(PI / 180 * camangle)), (100 * sin(PI / 180 * yangle)), (100 * cos(PI / 180 * camangle)), 0, 0, 0, 0, 1, 0);
+		if (turn == 0)
+		{
+			gluLookAt((Wzoom*sin(PI / 180 * Wcamangle)), (Wzoom * sin(PI / 180 * Wyangle)), (Wzoom* cos(PI / 180 * Wcamangle)), 0, 0, 0, 0, 1, 0);
+		}
+		else if (turn == 1)
+		{
+			gluLookAt((Bzoom*sin(PI / 180 * Bcamangle)), (Bzoom * sin(PI / 180 * Byangle)), (Bzoom* cos(PI / 180 * Bcamangle)), 0, 0, 0, 0, 1, 0);
+		}
+
+		GLfloat AmbientLight2[] = { 0.2f,0.2f,0.2f, 0.2f }; // 녹색조명
+		GLfloat DiffuseLight2[] = { 0.2f,0.2f,0.2f, 0.2f }; // 적색조명
+		GLfloat SpecularLight2[] = { 0.2f, 0.2f, 0.2f, 0.2f }; // 백색조명
+		GLfloat lightPos2[] = { 0, 100, 0, 1.0 }; // 위치: (10, 5, 20)
+
+		glEnable(GL_LIGHTING);
+
+		glLightfv(GL_LIGHT1, GL_AMBIENT, AmbientLight2);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, DiffuseLight2);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, SpecularLight2);
+		glLightfv(GL_LIGHT1, GL_POSITION, lightPos2);
+
+		glEnable(GL_LIGHT1);
 
 		glPushMatrix();
 		{
@@ -191,7 +215,10 @@ GLvoid drawScene(GLvoid)
 
 		glPushMatrix();
 		{
-			glColor3f(1, 0, 0);
+			if (turn == false)
+				glColor3f(1, 0, 0);
+			else
+				glColor3f(0, 1, 0);
 			if (turn == false)
 				glTranslatef(white_ball[choose].x, 20, white_ball[choose].y);
 			else
@@ -229,7 +256,7 @@ GLvoid Reshape(int w, int h)
 {
 	width = w;
 	height = h;
-
+	glEnable(GL_COLOR_MATERIAL);
 	for (int i = 0; i < 5; ++i)
 	{
 		blue_shot_check[i] = false;
@@ -259,19 +286,66 @@ void Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+	case '+':
+		if (turn == 0)
+		{
+			Wzoom -= 5;
+		}
+		else if (turn == 1)
+		{
+			Bzoom -= 5;
+		}
+		break;
+	case '-':
+		if (turn == 0)
+		{
+			Wzoom += 5;
+		}
+		else if (turn == 1)
+		{
+			Bzoom += 5;
+		}
+		break;
 	case 'w':
-		yangle += 3;
+		if (turn == 0)
+		{
+			Wyangle += 3;
+		}
+		else if (turn == 1)
+		{
+			Byangle += 3;
+		}
 		break;
 	case 's':
-		yangle -= 3;
+		if (turn == 0)
+		{
+			Wyangle -= 3;
+		}
+		else if (turn == 1)
+		{
+			Byangle -= 3;
+		}
 		break;
 	case 'a':
-		camangle -= 3;
+		if (turn == 0)
+		{
+			Wcamangle -= 3;
+		}
+		else if (turn == 1)
+		{
+			Bcamangle -= 3;
+		}
 		break;
 	case 'd':
-		camangle += 3;
+		if (turn == 0)
+		{
+			Wcamangle += 3;
+		}
+		else if (turn == 1)
+		{
+			Bcamangle += 3;
+		}
 		break;
-
 	case '1':
 		choose = 0;
 		break;
@@ -318,9 +392,9 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case ' ':
 		if (turn == false)
-			white_ball[choose].force += 0.05;
+			white_ball[choose].force += 0.15;
 		else
-			blue_ball[choose].force += 0.05;
+			blue_ball[choose].force += 0.15;
 		break;
 
 	case 'f':
@@ -361,7 +435,7 @@ void Timer(int value)
 		{
 			white_ball[i].x -= white_ball[i].force * white_ball[i].sin;
 			white_ball[i].y -= white_ball[i].force * white_ball[i].cos;
-			white_ball[i].force -= 0.02*FRICTION;
+			white_ball[i].force -= 0.01*FRICTION;
 			if (white_ball[i].force <= 0)
 			{
 				white_shot_check[i] = false;
@@ -390,7 +464,7 @@ void Timer(int value)
 		{
 			blue_ball[i].x += blue_ball[i].force * blue_ball[i].sin;
 			blue_ball[i].y += blue_ball[i].force * blue_ball[i].cos;
-			blue_ball[i].force -= 0.02*FRICTION;
+			blue_ball[i].force -= 0.01*FRICTION;
 			if (blue_ball[i].force <= 0)
 			{
 				blue_shot_check[i] = false;
@@ -433,7 +507,7 @@ void Timer(int value)
 					white_ball[i].cos = sin(Same_GetAngle(i, j));
 					white_ball[i].sin = cos(Same_GetAngle(i, j));
 				}
-				
+
 			}
 
 			for (int j = 0; j < 4; ++j)
@@ -477,11 +551,11 @@ void Timer(int value)
 		}
 		if ((white_ball[i].x > 100) || (white_ball[i].x < -100) || (white_ball[i].y > 100) || (white_ball[i].y < -100))
 		{
-			if (white_ball[i].z > -500)
+			if (white_ball[i].z > -600)
 			{
 				white_ball[i].z -= pow(grv, 2.0);
 				grv += 0.07f;
-				if (white_ball[i].z <= -500)
+				if (white_ball[i].z <= -600)
 				{
 					white_death[i] = true;
 
@@ -492,11 +566,11 @@ void Timer(int value)
 
 		if ((blue_ball[i].x > 100) || (blue_ball[i].x < -100) || (blue_ball[i].y > 100) || (blue_ball[i].y < -100))
 		{
-			if (blue_ball[i].z > -500)
+			if (blue_ball[i].z > -600)
 			{
 				blue_ball[i].z -= pow(grv, 2.0);
 				grv += 0.07f;
-				if (white_ball[i].z <= -500)
+				if (white_ball[i].z <= -600)
 				{
 
 					blue_death[i] = true;
