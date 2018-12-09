@@ -27,19 +27,18 @@ BALL white_ball[5] = { { -60,60 },{ 0,60 },{ 60,60 },{ -30,30 },{ 30,30 } };
 bool white_shot_check[5];
 bool blue_shot_check[5];
 
-bool turn = false;
+bool turn = true;
 
 void Keyboard(unsigned char key, int x, int y);
 void Timer(int value);
-void White_Shot(int n);
-void Blue_Shot(int n);
+
 
 float GetAngle(int ball1, int ball2);
 
 void main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA|GLUT_DEPTH); // 디스플레이 모드 설정
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH); // 디스플레이 모드 설정
 	glutInitWindowPosition(100, 100); // 윈도우의 위치지정
 	glutInitWindowSize(800, 600); // 윈도우의 크기 지정
 	glutCreateWindow("Example2"); // 윈도우 생성 (윈도우 이름)
@@ -117,18 +116,18 @@ GLvoid drawScene(GLvoid)
 	glPushMatrix();
 	{
 		glColor3f(0, 1, 0);
-		if(turn==false)
+		if (turn == false)
 			glTranslatef(white_ball[choose].x, 20, white_ball[choose].y);
 		else
 			glTranslatef(blue_ball[choose].x, 20, blue_ball[choose].y);
-		if(turn==false)
+		if (turn == false)
 			glRotatef(180, 1, 0, 0);
 
-		if(turn==false)
-			glRotatef(-1*white_ball[choose].angle, 0, 1, 0);
+		if (turn == false)
+			glRotatef(-1 * white_ball[choose].angle, 0, 1, 0);
 		else
 			glRotatef(blue_ball[choose].angle, 0, 1, 0);
-		if(turn==false)
+		if (turn == false)
 			glScalef(1 + white_ball[choose].force, 1 + white_ball[choose].force, 1 + white_ball[choose].force);
 		else
 			glScalef(1 + blue_ball[choose].force, 1 + blue_ball[choose].force, 1 + blue_ball[choose].force);
@@ -228,7 +227,7 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case ' ':
-		if(turn==false)
+		if (turn == false)
 			white_ball[choose].force += 0.02;
 		else
 			blue_ball[choose].force += 0.02;
@@ -256,7 +255,25 @@ void Timer(int value)
 			if (white_ball[i].force <= 0)
 			{
 				white_shot_check[i] = false;
-				
+				if (i == choose)
+				{
+					turn = true;
+					for (int i = 0; i < 5; ++i)
+					{
+						blue_shot_check[i] = false;
+						white_shot_check[i] = false;
+
+						white_ball[i].angle = 0;
+						white_ball[i].cos = 1;
+						white_ball[i].sin = 0;
+						white_ball[i].force = 0;
+
+						blue_ball[i].angle = 0;
+						blue_ball[i].cos = 1;
+						blue_ball[i].sin = 0;
+						blue_ball[i].force = 0;
+					}
+				}
 			}
 		}
 		if (blue_shot_check[i] == true)
@@ -267,33 +284,78 @@ void Timer(int value)
 			if (blue_ball[i].force <= 0)
 			{
 				blue_shot_check[i] = false;
+				if (i == choose)
+				{
+					turn = false;
+					for (int i = 0; i < 5; ++i)
+					{
+						blue_shot_check[i] = false;
+						white_shot_check[i] = false;
 
+						white_ball[i].angle = 0;
+						white_ball[i].cos = 1;
+						white_ball[i].sin = 0;
+						white_ball[i].force = 0;
+
+						blue_ball[i].angle = 0;
+						blue_ball[i].cos = 1;
+						blue_ball[i].sin = 0;
+						blue_ball[i].force = 0;
+					}
+				}
 			}
 		}
 
-		for (int j = 0; j < 5; ++j)
+		if (turn == false)
 		{
-			if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
+			for (int j = 0; j < 5; ++j)
 			{
-				blue_ball[j].force = white_ball[i].force/2;
-				blue_ball[j].cos = sin(GetAngle(i, j));
-				blue_ball[j].sin = cos(GetAngle(i, j));
-				blue_shot_check[j] = true;
-				printf("%f %f\n", white_ball[i].x, white_ball[i].y);
+				if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
+				{
+					blue_ball[j].force = white_ball[i].force / 2;
+					blue_ball[j].cos = sin(GetAngle(i, j));
+					blue_ball[j].sin = cos(GetAngle(i, j));
+					blue_shot_check[j] = true;
+					printf("%f %f\n", white_ball[i].x, white_ball[i].y);
+				}
+			}
+			for (int j = 0; j < 5; ++j)
+			{
+				if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
+				{
+					white_ball[j].force = blue_ball[i].force;
+					white_ball[j].cos = sin(GetAngle(j, i));
+					white_ball[j].sin = cos(GetAngle(j, i));
+					white_shot_check[j] = true;
+				}
 			}
 		}
-		for (int j = 0; j < 5; ++j)
+		else if (turn == true)
 		{
-			if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
+			for (int j = 0; j < 5; ++j)
 			{
-				white_ball[j].force = blue_ball[i].force;
-				white_ball[j].cos = sin(GetAngle(j, i));
-				white_ball[j].sin = cos(GetAngle(j, i));
-				white_shot_check[j] = true;
+				if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
+				{
+					white_ball[j].force = blue_ball[i].force;
+					white_ball[j].cos = sin(GetAngle(j, i));
+					white_ball[j].sin = cos(GetAngle(j, i));
+					white_shot_check[j] = true;
+				}
+			}
+			for (int j = 0; j < 5; ++j)
+			{
+				if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
+				{
+					blue_ball[j].force = white_ball[i].force / 2;
+					blue_ball[j].cos = sin(GetAngle(i, j));
+					blue_ball[j].sin = cos(GetAngle(i, j));
+					blue_shot_check[j] = true;
+					printf("%f %f\n", white_ball[i].x, white_ball[i].y);
+				}
 			}
 		}
 	}
-	
+
 	glutPostRedisplay();
 	glutTimerFunc(10, Timer, 1);
 }
@@ -310,60 +372,3 @@ float GetAngle(int ball1, int ball2)
 
 	return angle;
 }
-/*void White_Shot(int n)
-{
-	if (white_ball[n].force > 0)
-	{
-		white_ball[n].x -= white_ball[n].force * white_ball[n].sin;
-		white_ball[n].y -= white_ball[n].force * white_ball[n].cos;
-		white_ball[n].force -= 0.02*FRICTION;
-		if (white_ball[n].force <= 0)
-		{
-			white_shot_check[n] = false;
-			turn = true;
-		}
-		for (int i = 0; i < 5; ++i)
-		{
-			if (pow(white_ball[n].x - blue_ball[i].x, 2) + pow(white_ball[n].y - blue_ball[i].y, 2) < 100)
-			{
-				blue_ball[i].force = white_ball[n].force / 2;
-				blue_ball[i].sin = white_ball[n].sin;
-				blue_ball[i].cos = white_ball[n].cos;
-				if (blue_shot_check[i] == false)
-				{
-					blue_shot_check[i] = true;
-					Blue_Shot(i);
-				}
-			}
-		}
-	}
-}
-
-void Blue_Shot(int n)
-{
-	if (blue_ball[n].force > 0)
-	{
-		blue_ball[n].x += blue_ball[n].force * blue_ball[n].sin;
-		blue_ball[n].y += blue_ball[n].force * blue_ball[n].cos;
-		blue_ball[n].force -= 0.02*FRICTION;
-		if (blue_ball[n].force <= 0)
-		{
-			blue_shot_check[n] = false;
-			turn = false;
-		}
-		for (int i = 0; i < 5; ++i)
-		{
-			if (pow(blue_ball[n].x - white_ball[i].x, 2) + pow(blue_ball[n].y - white_ball[i].y, 2) < 100)
-			{
-				white_ball[i].force = blue_ball[n].force / 2;
-				white_ball[i].sin =  blue_ball[n].sin;
-				white_ball[i].cos =  blue_ball[n].cos;
-				if (white_shot_check == false)
-				{
-					white_shot_check[i] = true;
-					White_Shot(i);
-				}
-			}
-		}
-	}
-}*/
