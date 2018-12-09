@@ -275,10 +275,11 @@ void Timer(int value)
 		{
 			if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
 			{
-				blue_ball[j].force = white_ball[i].force;
+				blue_ball[j].force = white_ball[i].force/2;
 				blue_ball[j].cos = sin(GetAngle(i, j));
 				blue_ball[j].sin = cos(GetAngle(i, j));
 				blue_shot_check[j] = true;
+				printf("%f %f\n", white_ball[i].x, white_ball[i].y);
 			}
 		}
 		for (int j = 0; j < 5; ++j)
@@ -286,8 +287,8 @@ void Timer(int value)
 			if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
 			{
 				white_ball[j].force = blue_ball[i].force;
-				white_ball[j].cos = cos(30);
-				white_ball[j].sin = cos(30);
+				white_ball[j].cos = sin(GetAngle(j, i));
+				white_ball[j].sin = cos(GetAngle(j, i));
 				white_shot_check[j] = true;
 			}
 		}
