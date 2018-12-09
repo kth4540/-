@@ -27,7 +27,7 @@ BALL white_ball[5] = { { -60,60 },{ 0,60 },{ 60,60 },{ -30,30 },{ 30,30 } };
 bool white_shot_check[5];
 bool blue_shot_check[5];
 
-bool turn = true;
+bool turn = false;
 
 void Keyboard(unsigned char key, int x, int y);
 void Timer(int value);
@@ -228,9 +228,9 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case ' ':
 		if (turn == false)
-			white_ball[choose].force += 0.02;
+			white_ball[choose].force += 0.05;
 		else
-			blue_ball[choose].force += 0.02;
+			blue_ball[choose].force += 0.05;
 		break;
 
 	case 'f':
@@ -247,6 +247,7 @@ void Timer(int value)
 {
 	for (int i = 0; i < 5; ++i)
 	{
+		
 		if (white_shot_check[i] == true)
 		{
 			white_ball[i].x -= white_ball[i].force * white_ball[i].sin;
@@ -312,14 +313,14 @@ void Timer(int value)
 			{
 				if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
 				{
-					blue_ball[j].force = white_ball[i].force / 2;
+					blue_ball[j].force = white_ball[i].force;
 					blue_ball[j].cos = sin(GetAngle(i, j));
 					blue_ball[j].sin = cos(GetAngle(i, j));
 					blue_shot_check[j] = true;
 					printf("%f %f\n", white_ball[i].x, white_ball[i].y);
 				}
 			}
-			for (int j = 0; j < 5; ++j)
+/*			for (int j = 0; j < 5; ++j)
 			{
 				if (pow(blue_ball[i].x - white_ball[j].x, 2) + pow(blue_ball[i].y - white_ball[j].y, 2) < 100)
 				{
@@ -328,7 +329,7 @@ void Timer(int value)
 					white_ball[j].sin = cos(GetAngle(j, i));
 					white_shot_check[j] = true;
 				}
-			}
+			}*/
 		}
 		else if (turn == true)
 		{
@@ -340,17 +341,6 @@ void Timer(int value)
 					white_ball[j].cos = sin(GetAngle(j, i));
 					white_ball[j].sin = cos(GetAngle(j, i));
 					white_shot_check[j] = true;
-				}
-			}
-			for (int j = 0; j < 5; ++j)
-			{
-				if (pow(white_ball[i].x - blue_ball[j].x, 2) + pow(white_ball[i].y - blue_ball[j].y, 2) < 100)
-				{
-					blue_ball[j].force = white_ball[i].force / 2;
-					blue_ball[j].cos = sin(GetAngle(i, j));
-					blue_ball[j].sin = cos(GetAngle(i, j));
-					blue_shot_check[j] = true;
-					printf("%f %f\n", white_ball[i].x, white_ball[i].y);
 				}
 			}
 		}
